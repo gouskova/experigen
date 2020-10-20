@@ -5,7 +5,6 @@ use Fcntl qw(:flock);
 use CGI;
 my $q = new CGI;
 use URI::Escape;
-my $dbfolder = "storage";
 
 #use JSON;
 
@@ -17,12 +16,12 @@ my @names = $q->url_param;
 
 # verify that the experiment name is there
 if(!$q->url_param("experimentName") || $q->url_param("experimentName")!~/^[A-Za-z0-9]+$/) {
-	$success = "false1";
+	$success = "false";
 }
 
-my $sourceurl = uri_escape($q->url_param("sourceurl"),"^A-Za-z0-9\_\.\%\~\!\-\*\(\)\'");
-if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
-	$success = "false2";
+my $sourceurl = uri_escape($q->url_param("sourceurl"),"^A-Za-z0-9\.\%\~\!\*\(\)\'");
+if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\.\%\~\!\*\(\)\']+$/) {
+	$success = "false";
 }
 
 
@@ -35,13 +34,13 @@ if ($success eq "true") {
 	my  $experimentName = $1;
 
 	# un-tainting the source url
-	$sourceurl =~ /^([A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+)$/;
+	$sourceurl =~ /^([A-Za-z0-9\.\%\~\!\*\(\)\']+)$/;
 	my $sourceURL = $1;
 
 	my %users;
 
 	# go over users file, collect data
-	open (USERS, "<" . $dbfolder . "/" . $sourceURL . "/" . $experimentName . "/users.txt") or die "Can't open users file. $!";
+	open (USERS, "<storage" . "/" . $sourceURL . "/" . $experimentName . "/users.txt") or die "Can't open users file. $!";
 	while (<USERS>) {
 		s/[\r\n]//g;
 		$users{$_}++;
@@ -61,7 +60,7 @@ if ($success eq "true") {
 
 } else {
 	print $q->header(-charset=>'utf-8');
-	print "$success\n" ;
+	print "false\n" ;
 
 }
 
