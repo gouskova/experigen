@@ -4,6 +4,7 @@ use warnings;
 use Fcntl qw(:flock);
 use CGI;
 my $q = new CGI;
+my $dbfolder = "storage";
 
 my $success = "true";
 my @names = $q->url_param;
@@ -19,7 +20,7 @@ if(!$q->url_param("userCode") || $q->url_param("userCode")!~/^[A-Z]+(\d+)$/) {
 if(!$q->url_param("experimentName") || $q->url_param("experimentName")!~/^[A-Za-z0-9]+$/) {
 	$success = "false";
 }
-if(!$q->url_param("sourceurl") || $q->url_param("sourceurl")!~/^[A-Za-z0-9\.\%\~\!\*\(\)\']+$/) {
+if(!$q->url_param("sourceurl") || $q->url_param("sourceurl")!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
 	$success = "false";
 }
 
@@ -34,22 +35,25 @@ if ($success eq "true") {
 
 	# un-tainting the experiment name
 	my $exp = $q->url_param("experimentName");
-	$exp =~ /^([A-Za-z0-9]+)$/;
+	$exp =~ /^([A-Za-z0-9_]+)$/;
 	my  $experimentName = $1;
 
 	# un-tainting the source url
 	my $source = $q->url_param("sourceurl");
-	$source =~ /^([A-Za-z0-9\.\%\~\!\*\(\)\']+)$/;
+	$source =~ /^([A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+)$/;
 	my  $sourceURL = $1;
 
 	# simplifying the source URL
 	$sourceURL =~ s/^http%3A%2F%2F//;
+	$sourceURL =~ s/^https%3A%2F%2F//;
 	$sourceURL =~ s/%2F$//;
 	$sourceURL =~ s/%3A/./g;
 	$sourceURL =~ s/%2F/./g;
 	$sourceURL =~ s/%7E//g;
+	$sourceURL =~ s/%2D/./g;
+	$sourceURL =~ s/%5F/./g;
 	$sourceURL =~ s/~//g;
-
+	$sourceURL =~ s/_/./g;
 
 	# prepare an array to write to the server
 	my @fields;
@@ -64,27 +68,26 @@ if ($success eq "true") {
 		@{$_}[1] =~ s/"/'/sg;
 		@{$_}[1] =~ s/\n/ /sg;
 		@{$_}[1] =~ s/\r/ /sg;
-		@{$_}[1] =~ s/,/‚/sg;
+		@{$_}[1] =~ s/,/‚/sg; 
 		$_ = '"' . @{$_}[0] . '": "'  . @{$_}[1] .'"'; 
 	}
 	
 	####can't use without the appropriate module
-	####make_path("storage"."/".$sourceURL."/".$experimentName);
 
 	# create a folder for the experiment if it isn't there
-	if (-d "storage/".$sourceURL."/".$experimentName) {
+	if (-d $dbfolder."/".$sourceURL."/".$experimentName) {
 		# folder exists, nothing to do
 	}
 	else {
 		# make folder
-		mkdir "storage/".$sourceURL , 0777;
-		mkdir "storage/".$sourceURL."/".$experimentName, 0777;
+		mkdir $dbfolder."/".$sourceURL , 0777;
+		mkdir $dbfolder."/".$sourceURL."/".$experimentName, 0777;
 	}
 
 
 	# append JSON to user file	
 	my $str = '{' . join(", ",@fields) . "}\r\n";
-	open (USER, ">>storage/" . $sourceURL . "/" . $experimentName . "/user" . $userFileName . ".txt") or die "Can't open user file. $!";
+	open (USER, ">>". $dbfolder . "/" . $sourceURL . "/" . $experimentName . "/user" . $userFileName . ".txt") or die "Can't open user file. $!";
 	print USER "$str";
 	close(USER) or die "Can't close user file. $!";
 
@@ -95,7 +98,7 @@ if ($success eq "true") {
 	my  $userCode = $1;
 
 	$str = "$userCode\r\n";
-	open (USER, ">>storage/" . $sourceURL . "/" . $experimentName . "/users.txt") or die "Can't open users file. $!";
+	open (USER, ">>" . $dbfolder . "/" . $sourceURL . "/" . $experimentName . "/users.txt") or die "Can't open users file. $!";
 	print USER "$str";
 	close(USER) or die "Can't close users file. $!";
 	
@@ -107,7 +110,7 @@ if ($success eq "true") {
 my $callback = $q->url_param("callback") || "";
 my $str = '"' . $success . '"';
 # write result
-print $q->header(-charset=>'utf-8');
+print $q->header(-type=>'text/javascript',-charset=>'utf-8');
 print $callback . '(' . $str . ')' ;
 
 

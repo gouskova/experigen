@@ -5,7 +5,7 @@ use Fcntl qw(:flock);
 use CGI;
 my $q = new CGI;
 use URI::Escape;
-
+my $dbfolder = "storage";
 #use JSON;
 
 
@@ -19,8 +19,8 @@ if(!$q->url_param("experimentName") || $q->url_param("experimentName")!~/^[A-Za-
 	$success = "false";
 }
 
-my $sourceurl = uri_escape($q->url_param("sourceurl"),"^A-Za-z0-9\.\%\~\!\*\(\)\'");
-if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\.\%\~\!\*\(\)\']+$/) {
+my $sourceurl = uri_escape($q->url_param("sourceurl"),"^A-Za-z0-9\_\.\%\~\!\-\*\(\)\'");
+if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
 	$success = "false";
 }
 
@@ -34,18 +34,18 @@ if ($success eq "true") {
 	my  $experimentName = $1;
 
 	# un-tainting the source url
-	$sourceurl =~ /^([A-Za-z0-9\.\%\~\!\*\(\)\']+)$/;
+	$sourceurl =~ /^([A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+)$/;
 	my $sourceURL = $1;
 
 	my %data;
 	$data{"default.csv"} = [];
 
 	# go over all the user files, collect data
-	opendir(USERS,"storage"."/".$sourceURL."/".$experimentName) or die "Couldn't open user directory $!";
+	opendir(USERS,$dbfolder."/".$sourceURL."/".$experimentName) or die "Couldn't open user directory $!";
 	while (my $file = readdir(USERS)) {
 		if ($file =~ /^user\d+.txt$/) {
 
-			open (USER, "<storage" . "/" . $sourceURL . "/" . $experimentName . "/" . $file) or die "Can't open user file. $!";
+			open (USER, "<" . $dbfolder . "/" . $sourceURL . "/" . $experimentName . "/" . $file) or die "Can't open user file. $!";
 			while (<USER>) {
 				chomp;
 				# turn each line into a hash (=manual JSONing)
@@ -86,6 +86,7 @@ if ($success eq "true") {
 		}
 		delete $fields{"callback"};
 		delete $fields{"sourceurl"};
+		delete $fields{"_"};
 
 		# write the tab-separated output
 		$files{$currentFile} .= join("\t", sort keys(%fields)) . "\n";
