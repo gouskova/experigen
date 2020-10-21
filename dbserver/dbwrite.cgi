@@ -20,7 +20,7 @@ if(!$q->url_param("userCode") || $q->url_param("userCode")!~/^[A-Z]+(\d+)$/) {
 if(!$q->url_param("experimentName") || $q->url_param("experimentName")!~/^[A-Za-z0-9]+$/) {
 	$success = "false";
 }
-if(!$q->url_param("sourceurl") || $q->url_param("sourceurl")!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
+if(!$q->url_param("sourceurl") || $q->url_param("sourceurl")!~/^[A-Za-z0-9\.\%\~\!\-\*\(\)\']+$/) {
 	$success = "false";
 }
 
@@ -53,8 +53,6 @@ if ($success eq "true") {
 	$sourceURL =~ s/%2D/./g;
 	$sourceURL =~ s/%5F/./g;
 	$sourceURL =~ s/~//g;
-	$sourceURL =~ s/_/./g;
-	$sourceURL =~ s/-/./g;
 
 
 	# prepare an array to write to the server

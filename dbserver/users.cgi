@@ -33,14 +33,10 @@ if ($success eq "true") {
 	my $exp = $q->url_param("experimentName");
 	$exp =~ /^([A-Za-z0-9]+)$/;
 	my  $experimentName = $1;
-	print "experimentName:";
-	print $experimentName;
 
 	# un-tainting the source url
 	$sourceurl =~ /^([A-Za-z0-9\.\%\~\!\-\*\(\)\']+)$/;
 	my $sourceURL = $1;
-	print "sourceURL";
-	print $sourceURL;
 
 	my %users;
 
