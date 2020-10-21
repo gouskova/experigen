@@ -28,15 +28,19 @@ if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
 
 
 if ($success eq "true") {
-
+	#debugging cgi errors
+	print CGI::header();
+	print "Success";
 	# un-tainting the experiment name
 	my $exp = $q->url_param("experimentName");
 	$exp =~ /^([A-Za-z0-9]+)$/;
 	my  $experimentName = $1;
+	print $experimentName;
 
 	# un-tainting the source url
 	$sourceurl =~ /^([A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+)$/;
 	my $sourceURL = $1;
+	print $sourceURL;
 
 	my %users;
 
