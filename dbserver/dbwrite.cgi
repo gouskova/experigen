@@ -54,6 +54,8 @@ if ($success eq "true") {
 	$sourceURL =~ s/%5F/./g;
 	$sourceURL =~ s/~//g;
 	$sourceURL =~ s/_/./g;
+	$sourceURL =~ s/-/./g;
+
 
 	# prepare an array to write to the server
 	my @fields;

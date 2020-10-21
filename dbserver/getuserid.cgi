@@ -45,6 +45,8 @@ if ($success eq "true") {
 	$sourceURL =~ s/%5F/./g;
 	$sourceURL =~ s/~//g;
 	$sourceURL =~ s/_/./g;
+	$sourceURL =~ s/-/./g;
+
 
 	####can't use without the appropriate module
 
