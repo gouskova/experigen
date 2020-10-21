@@ -20,8 +20,8 @@ if(!$q->url_param("experimentName") || $q->url_param("experimentName")!~/^[A-Za-
 	$success = "false1";
 }
 
-my $sourceurl = uri_escape($q->url_param("sourceurl"),"^A-Za-z0-9\_\.\%\~\!\-\*\(\)\'");
-if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
+my $sourceurl = uri_escape($q->url_param("sourceurl"),"^A-Za-z0-9\.\%\~\!\-\*\(\)\'");
+if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\.\%\~\!\-\*\(\)\']+$/) {
 	$success = "false2";
 }
 
@@ -29,17 +29,17 @@ if(!$sourceurl || $sourceurl!~/^[A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+$/) {
 
 if ($success eq "true") {
 	#debugging cgi errors
-	print CGI::header();
-	print "Success";
 	# un-tainting the experiment name
 	my $exp = $q->url_param("experimentName");
 	$exp =~ /^([A-Za-z0-9]+)$/;
 	my  $experimentName = $1;
+	print "experimentName:";
 	print $experimentName;
 
 	# un-tainting the source url
-	$sourceurl =~ /^([A-Za-z0-9\_\.\%\~\!\-\*\(\)\']+)$/;
+	$sourceurl =~ /^([A-Za-z0-9\.\%\~\!\-\*\(\)\']+)$/;
 	my $sourceURL = $1;
+	print "sourceURL";
 	print $sourceURL;
 
 	my %users;
